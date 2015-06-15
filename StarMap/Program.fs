@@ -76,8 +76,8 @@ let calcMotion2 (x, y) (x', y') (x1, y1) (x1', y1') eps =
     if (abs (x1' - (x1 * ang2cP - y1 * ang2s + x0_2P)) < eps) && (abs (y1' - (x1 * ang2s + y1 * ang2cP + y0_2P)) < eps) then 
       res <- (ang2s, ang2cP, x0_2P, y0_2P)
     else
-      if (abs (x1' - (x1 * ang1cN - y1 * ang1s + x0_1N)) < eps) && (abs (y1' - (x1 * ang1s + y1 *  ang1cN + y0_1N)) < eps) then 
-          res <- (ang1s, ang1cN, x0_1N, y0_1N)
+      //if (abs (x1' - (x1 * ang1cN - y1 * ang1s + x0_1N)) < eps) && (abs (y1' - (x1 * ang1s + y1 *  ang1cN + y0_1N)) < eps) then 
+        //  res <- (ang1s, ang1cN, x0_1N, y0_1N)
      // else
       if (abs (x1' - (x1 * ang2cN - y1 * ang2s + x0_2N)) < eps) && (abs (y1' - (x1 * ang2s + y1 * ang2cN + y0_2N)) < eps) then 
           res <- (ang2s, ang2cN, x0_2N, y0_2N)
@@ -101,17 +101,23 @@ let stringToPoint (s : string) =
 let length (a : float ,b : float) (c : float,d : float)  = 
   sqrt (pown (a - c) 2 + pown (b - d) 2)
 
-let motionPoint (x,y) sin cos x0 y0 = 
-  let x' = x * cos - y * sin + x0
-  let y' = x * sin + y * cos + y0
+let motionPoint (x,y) sin cos x0 y0 (xshift, yshift) =
+  let x = x - xshift
+  let y = y - yshift 
+  let x' = x * cos - y * sin + x0 + xshift
+  let y' = x * sin + y * cos + y0 + yshift
   (x', y')
   
 [<EntryPoint>]
 let main argv = 
-  let (sin, cos, x0, y0) = calcMotion2 (3.0,3.0) (20.0,4.0) (3.0,1.0) (20.0,6.0) 0.1
-  printfn "%A" (motionPoint (1.0,1.0) sin cos x0 y0)
   (*
-  let in1 = new System.IO.StreamReader ("in.txt")
+  let (sin, cos, x0, y0) = calcMotion2 (3.0,1.0) (20.0,6.0) (3.0,3.0) (20.0,4.0) 0.1
+  let xshift = 3.0
+  let yshift = 1.0
+  printfn "%A" (motionPoint (1.0,1.0) sin cos x0 y0 (xshift, yshift))
+  *)
+  
+  use in1 = new System.IO.StreamReader ("in.txt")
   let pointDelta = (float) (in1.ReadLine ())
   let arcDelta = (float) (in1.ReadLine ())
   let mutable buffer = in1.ReadLine ()
@@ -132,7 +138,7 @@ let main argv =
 
   let mutable arcBuffer = []
   for i = 0 to map1.Length - 1 do
-   for j = i to map1.Length - 1 do
+   for j = i + 1 to map1.Length - 1 do
     arcBuffer <- (length map1.[i] map1.[j], (map1.[i], map1.[j])) :: arcBuffer
       //Complicated structure (length, (point, pont)) is used so that 'fst' and 'snd' commands could be used
   let arcs1 = List.toArray arcBuffer
@@ -143,7 +149,7 @@ let main argv =
     arcBuffer <- (length map2.[i] map2.[j], (map2.[i], map2.[j])) :: arcBuffer
   let arcs2 = Array.sort (List.toArray arcBuffer)
   
-  let mutable res = 0
+  let res = ref 0
   for arc in arcs1 do
     let mutable m = arcs2.Length / 2
     let arcs2len = arcs2.Length
@@ -153,35 +159,44 @@ let main argv =
       if (fst arc < fst arcs2.[m]) then m <- m / 2
       else m <- m + (arcs2len - m) / 2
       mChange <- mOld - m
-    let mutable sndArc = m
-    while abs(fst arc - fst arcs2.[sndArc]) < arcDelta && sndArc > 0 do
-      sndArc <- sndArc - 1
-    while abs(fst arc - fst arcs2.[sndArc]) < arcDelta do
-      let mutable count = 0
-      let (sin, cos, x0, y0) = calcMotion2 (fst (snd arc)) (fst (snd arcs2.[sndArc])) (snd (snd arc)) (snd (snd arcs2.[sndArc])) pointDelta
-      for i in map1 do
-        let fstPoint = motionPoint i sin cos x0 y0
-        let map2len = map2.Length
-        let mutable mpoint = map2.Length / 2
-        let mutable mpointChange = 1
-        while abs (fst fstPoint - fst map2.[mpoint]) > pointDelta  && mpointChange <> 0 do
-          let mpointOld = mpoint
-          if (fst fstPoint < fst map2.[mpoint]) then mpoint <- mpoint / 2
-          else mpoint <- mpoint + (map2len - mpoint) / 2
-          mpointChange <- mpointOld - m
-        while abs (fst fstPoint - fst map2.[mpoint]) < pointDelta && mpoint > 0 do
-          mpoint <- mpoint - 1
+    let sndArc = ref m
+    while !sndArc > 0 && abs(fst arc - fst arcs2.[!sndArc]) < arcDelta do
+      sndArc.Value <- !sndArc - 1
+    if (abs(fst arc - fst arcs2.[!sndArc]) > arcDelta) then sndArc.Value <- !sndArc + 1
 
-        let mutable notFoundFlag = true
-        while abs (fst fstPoint - fst map2.[mpoint]) < pointDelta && notFoundFlag && mpoint < map2.Length do
-          if length fstPoint map2.[mpoint] < pointDelta then
-            count <- count + 1
-            notFoundFlag <- false
-          mpoint <- mpoint + 1
-      if (count > res) then res <- count
-      sndArc <- sndArc + 1
-  printfn "%A" res
-  *)
+    while !sndArc < arcs2.Length && abs(fst arc - fst arcs2.[!sndArc]) < arcDelta do
+      let (sin, cos, x0, y0) = calcMotion2 (fst (snd arc)) (fst (snd arcs2.[!sndArc])) (snd (snd arc)) (snd (snd arcs2.[!sndArc])) pointDelta
+      let functio (sin, cos, x0, y0) (xshift, yshift) = 
+        let map2len = map2.Length
+        let usedPoints = Array.create map2len false
+        let mutable count = 0
+        for i in map1 do
+          let fstPoint = motionPoint i sin cos x0 y0 (xshift, yshift)
+          let mutable mpoint = map2.Length / 2
+          let mutable mpointChange = 1
+          while abs (fst fstPoint - fst map2.[mpoint]) > pointDelta  && mpointChange <> 0 do
+            let mpointOld = mpoint
+            if (fst fstPoint < fst map2.[mpoint]) then mpoint <- mpoint / 2
+            else mpoint <- mpoint + (map2len - mpoint) / 2
+            mpointChange <- mpointOld - mpoint
+          while abs (fst fstPoint - fst map2.[mpoint]) < pointDelta && mpoint > 0 do
+            mpoint <- mpoint - 1
+          if (abs (fst fstPoint - fst map2.[mpoint]) > pointDelta) then mpoint <- mpoint + 1
+          let mutable notFoundFlag = true
+          while mpoint < map2.Length && abs (fst fstPoint - fst map2.[mpoint]) < pointDelta && notFoundFlag do
+            if length fstPoint map2.[mpoint] < pointDelta && not usedPoints.[mpoint] then
+              count <- count + 1
+              usedPoints.[mpoint] <- true
+              notFoundFlag <- false
+            mpoint <- mpoint + 1
+        if (count > !res) then res.Value <- count
+        sndArc.Value <- !sndArc + 1
+      functio (sin, cos, x0, y0) (fst (snd arc))
+      if (!sndArc < arcs2.Length) then
+        let (sin, cos, x0, y0) = calcMotion2 (snd (snd arc)) (fst (snd arcs2.[!sndArc])) (fst (snd arc)) (snd (snd arcs2.[!sndArc])) pointDelta
+        functio (sin, cos, x0, y0) (snd (snd arc))
+  printfn "%A" !res
+  
   (*
   for i in map1 do
     printf "%A " i
