@@ -127,7 +127,7 @@ let main argv =
       while abs(fst arc- fst arcs2.[sndArc]) > arcDelta && sndArcChange <> 0 do
         let sndArcOld = sndArc
         if (fst arc < fst arcs2.[sndArc]) then sndArc <- sndArc / 2
-        else sndArc <- sndArc + (arcs2len - sndArc) / 2
+        else sndArc <- sndArc + (sndArcOld - sndArc) / 2
         sndArcChange <- sndArcOld - sndArc
       while sndArc > 0 && abs(fst arc - fst arcs2.[sndArc]) < arcDelta do
         sndArc <- sndArc - 1
@@ -147,7 +147,7 @@ let main argv =
             while abs (fst fstPoint - fst map2.[sndPoint]) > pointDelta  && sndPointChange <> 0 do
               let sndPointOld = sndPoint
               if (fst fstPoint < fst map2.[sndPoint]) then sndPoint <- sndPoint / 2
-              else sndPoint <- sndPoint + (map2len - sndPoint) / 2
+              else sndPoint <- sndPoint + (sndPointOld - sndPoint) / 2
               sndPointChange <- sndPointOld - sndPoint
             while abs (fst fstPoint - fst map2.[sndPoint]) < pointDelta && sndPoint > 0 do
               sndPoint <- sndPoint - 1
