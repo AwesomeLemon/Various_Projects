@@ -1,7 +1,7 @@
 @echo off
 if exist ".git" goto :continue
 git.exe clone --progress -v "https://github.com/AwesomeLemon/Various_Projects" %cd%\temp >> log.txt 2>&1
-xcopy /e /q /h %cd%\temp %cd%
+xcopy /e /q /h /y %cd%\temp %cd%
 goto :build
 :continue
 if not exist out goto :update
