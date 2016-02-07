@@ -21,5 +21,3 @@ goto :build
 mkdir out
 echo Solution building in progress.
 msbuild %cd%\KeyboardTrainer\KeyboardTrainer.sln /p:Configuration=Release /p:OutDir=..\..\out /p:TargetFramework=v4.0 >> log.txt 2>&1
-
-sendEmail.bat

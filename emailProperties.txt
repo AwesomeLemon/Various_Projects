@@ -1,7 +1,0 @@
-to=recieverSEIntroductionProject@gmail.com
-from=senderSEIntroductionProject@gmail.com
-smtp=smtp.gmail.com
-sub=make_result
-user=senderSEIntroductionProject@gmail.com
-pass=%PASSWORD_WITH_QUOTATION_MARKS%
-attach="log.txt"
