@@ -1,4 +1,17 @@
-﻿let calcMotion (x, y) (x', y') (x1, y1) (x1', y1') eps =
+﻿(*
+A program that, given two 'star maps' (which are sets of plane points) and 
+possible deltas between:
+  (1) arcs lengths 
+  (2) points
+calculates the maximum number of points that can coincide after any motion of plane.
+Points 'coincide' if and only if after motion they are not farther from each other than point delta.
+
+This program was written for contest for participating in student summer project 'CUDA Fingerprinting 2'.
+
+by Alexander Chebykin
+*)
+
+let calcMotion (x, y) (x', y') (x1, y1) (x1', y1') eps =
   let mutable res = (0.0, 0.0, 0.0, 0.0) // (sin of angle, cos of angle, shift on X axis, shift on Y axis)
   //Motion that moves one arc to another of similar size always exists, so initial contents of res don't matter
 

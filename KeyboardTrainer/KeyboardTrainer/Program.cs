@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * A little program I wrote when I had no Internet for a couple of hours, but wanted to practice
+ * my blind typing skills, which I was improving at the moment.
+ * 
+ * by Alexander Chebykin.
+ */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
